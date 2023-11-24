@@ -13,15 +13,20 @@ def generate_fake_data(count):
     return fake_data
 
 # function to write fake data to sql file
-def write_to_sql_file(fake_data):
-    with open("clients.sql", "w") as f:
+def write_to_sql_file(filename, fake_data):
+    with open(f"{filename}.sql", "w") as f:
         for data in fake_data:
-            f.write(f"INSERT INTO clients (name, date, price) VALUES ('{data[0]}', '{data[1]}', {data[2]});\n")
+            f.write(f"INSERT INTO {filename} (name, date, price) VALUES ('{data[0]}', '{data[1]}', {data[2]});\n")
 
-# main function to generate fake data and write to sql file
+
 def main(count):
+    # filename to insert the table into
+    print("Welcome to the table generator!\nYou are supposed to enter the filename to insert the table into.\nThe filename should be a table name of your table.\n")
+    filename = input("Enter the filename to insert the table into:")
+    if filename == "exit":
+        pass
     fake_data = generate_fake_data(count)
-    write_to_sql_file(fake_data)
+    write_to_sql_file(filename=filename, fake_data=fake_data)
 
 # example usage
 main(100)
