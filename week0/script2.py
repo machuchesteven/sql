@@ -76,4 +76,9 @@ def data_by_type(dt:str):
 def fake_name():
     name = fake.name().split(" ")[0]
     return name
+
+def fake_description(words:int):
+    return fake.sentence(words)
+
 def fake_address():
+    fake.address()
