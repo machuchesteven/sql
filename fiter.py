@@ -14,3 +14,9 @@ if counter.index("") >= 0:
 
 print(counter)
 print("counter_list: ", counter)
+
+
+counter_items = ""
+for item in counter:
+    counter_items += f"{item},"
+print(counter_items[:-1])

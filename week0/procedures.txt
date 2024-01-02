@@ -1,0 +1,59 @@
+create table [dbo].[products] (
+ id int identity primary key,
+ name varchar(80),
+ description text,
+ price numeric(10, 2),
+ stock int,
+ date_added date not null default getdate(),
+ category_id int null,
+ constraint FK_Products_Categories foreign key (category_id) references [dbo].[categories](id) on delete no action
+);
+
+
+drop table products;
+
+
+create procedure [dbo].[sp_get_product_with_id] @id int
+as
+begin
+select id as Id, name as Name,  description as Description, price as Price, stock as Stock, date_added as DateAdded, category_id as CategoryId from [dbo].[products] where id = @id
+end
+GO
+
+
+
+
+exec sp_get_products
+
+create procedure [dbo].[sp_get_categories]
+as
+begin
+select id as Id, name as Name, description as Description from [dbo].[categories]
+end
+Go
+
+
+exec sp_get_categories 
+
+create procedure [dbo].[sp_get_category_by_id] @id int
+as
+begin
+select id as Id, name as Name, description as Description from [dbo].[categories] where id=@id
+end
+Go
+
+
+create procedure [dbo].[sp_add_category](@Name varchar(50), @Description  text)
+as
+begin
+insert into [dbo].[categories](name, description) values (@Name, @Description)
+end
+Go
+
+create procedure [dbo].[sp_get_products_by_category] @category_id int
+as
+begin
+select id as Id, name as Name,  description as Description, price as Price, stock as Stock, date_added as DateAdded, category_id as CategoryId from [dbo].[products] where @category_id = @category_id
+end
+Go
+
