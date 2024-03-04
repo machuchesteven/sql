@@ -189,3 +189,12 @@ select substring(original_text from '\d{4} [hrs]') from crime_reports;
 -- we miht find something useful later
 
 ```
+
+Here we matched values using the substring funtion but we are using regexp_match(string, pattern) which is verys similar to the substring function with a few exceptions
+
+```sql
+SELECT REGEXP_MATCH(original_text, '\d{8,10}') FROM crime_reports;
+
+-- now we can convert all of our previous statements to using a regexp_match function
+
+```

@@ -1,4 +1,4 @@
-# This repository is for mastering Complex Emterprise grade sql queries
+# This repository is for mastering Complex Enterprise grade sql queries
 
 The major aim is help mastery of the art from design and programming of sql databases with relations to
 Implementing all design patterns, with the TDD approach in mind. The Repository is aimed to have
