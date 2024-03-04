@@ -1,0 +1,68 @@
+Later, extract the ZIP file and Place this folder as shown in video.
+
+First SQL File to be Executed ::
+----------------------------------
+
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_main.sql
+
+
+Parameter 1 ::
+----------------------
+hr
+
+Parameter 2 ::
+----------------------
+users
+
+Parameter 3 ::
+----------------------
+temp
+
+Parameter 4 :: { Only this will change}
+----------------------
+admin
+
+Parameter 5 ::
+----------------------
+$ORACLE_HOME/demo/schema/log
+
+Parameter 6 ::
+----------------------
+localhost:1521/XEPDB1
+
+
+------------------------------------------------------------------------------
+Except Parameter 4, all are CONSTANT Values, there won't be any changes
+------------------------------------------------------------------------------
+
+
+
+Second SQL File to be Executed ::
+----------------------------------
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_cre.sql
+
+
+Third SQL File to be Executed ::
+----------------------------------
+
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_popul.sql
+
+
+Fourth SQL File to be Executed ::
+----------------------------------
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_idx.sql
+
+
+Fifth SQL File to be Executed ::
+----------------------------------
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_code.sql
+
+
+Sixth SQL File to be Executed ::
+----------------------------------
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_comnt.sql
+
+
+Final SQL File to be Executed ::
+----------------------------------
+@ C:\app\guru1\product\21c\dbhomeXE\demo\schema\human_resources\hr_analz.sql

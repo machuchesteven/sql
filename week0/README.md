@@ -47,8 +47,6 @@ This table contains the employees of an imaginary faker company created through 
 
 ### Products table
 
-
-
 create table [dbo].[categories](
 id int identity primary key,
 name varchar(50),

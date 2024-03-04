@@ -9,3 +9,8 @@ Every challenge will have an Entity Diagram, Brainstormed Problem Statement, spe
 
 The script is supposed to run based on the type of database to be implemented into which is MSSQL database, which is the defactor standard database for enterprise applications.
 Also, these challenges may have subchallenges and they can be used to be shared and references to sources of the challenges will be shared
+
+## Facilitation libraries
+
+So far, we have a facilitation libray used `faker` for python helping data creation
+We need to add another library called `faker-commerce` for generation of products informations

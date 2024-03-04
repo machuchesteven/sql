@@ -1,0 +1,196 @@
+SELECT department, spend_2014, spend_2017, ROUND((spend_2017 - spend_2014)/ spend_2014, 1) * 100 as pec
+FROM percentage_change
+ORDER BY 1 DESC;
+-- ROUND(NUMBER, DECIMAL_POINTS)
+
+
+SELECT 
+SUM(spend_2014) AS "Dept Sum 2014",
+ROUND(AVG(spend_2014), 2) AS "Dept Avg 2014",
+SUM(spend_2017) AS "Dept Sum 2017",
+ROUND(AVG(spend_2017), 2) AS "Dept Avg 2017"
+FROM percentage_change
+ORDER BY 2,4 DESC;
+
+CREATE TABLE people
+(
+	id serial primary key,
+	name varchar(20) not null,
+	age int
+);
+
+
+insert into people(name, age) values 
+('Ali', 98),
+('Koku', 2),
+('Kio',6 ),
+('Dai', 24),
+('Keti', 54);
+
+
+SELECT * FROM people;
+
+-- we need to find the media age of people in our tables
+
+-- there is no a specified median function, but there is a 
+-- percentile function that makes the 50% one median
+
+SELECT PERCENTILE_CONT(.5)
+WITHIN GROUP (ORDER BY age),
+PERCENTILE_DISC(.5)
+WITHIN GROUP (ORDER BY age)
+FROM people;
+
+
+SELECT 
+MIN(spend_2017),
+PERCENTILE_CONT(.1)
+WITHIN GROUP (ORDER BY spend_2017),
+PERCENTILE_CONT(.25)
+WITHIN GROUP (ORDER BY spend_2017),
+PERCENTILE_CONT(.5)
+WITHIN GROUP (ORDER BY spend_2017),
+PERCENTILE_DISC(.75)
+WITHIN GROUP (ORDER BY spend_2017),
+PERCENTILE_DISC(1)
+WITHIN GROUP (ORDER BY spend_2017),
+PERCENTILE_CONT(ARRAY[.1, .25, .5, .75, 1])
+WITHIN GROUP (ORDER BY spend_2014) AS quartiles,
+MAX(spend_2017)
+FROM percentage_change;
+
+
+
+
+
+
+
+ALTER    procedure [reports].[spGetLast14DaysAttendances] @NumDays INT = 14, @date DATE = NULL
+as
+begin
+IF @date IS NULL
+        SET @date = CAST(GETDATE() AS DATE);
+
+DECLARE @logicLateHour INT = 8;
+DECLARE @cols AS NVARCHAR(MAX);
+DECLARE @query AS NVARCHAR(MAX);
+
+WITH FirstIn AS (
+    SELECT 
+        Username, 
+        CAST(CapturedTime AS DATE) AS CaptureDate,
+        CapturedTime,
+        ROW_NUMBER() OVER (PARTITION BY Username, CAST(CapturedTime AS DATE) ORDER BY CapturedTime) AS RowNum
+    FROM 
+        [ATTENDANCEDB].[attendance].[Attendance]
+    WHERE 
+        IsAllowed = 1 AND IsEntering = 1
+),
+LastOut AS (
+    SELECT 
+        Username, 
+        CAST(CapturedTime AS DATE) AS CaptureDate,
+        CapturedTime,
+        ROW_NUMBER() OVER (PARTITION BY Username, CAST(CapturedTime AS DATE) ORDER BY CapturedTime DESC) AS RowNum
+    FROM 
+        [ATTENDANCEDB].[attendance].[Attendance]
+    WHERE 
+        IsAllowed = 1 AND IsEntering = 0
+),
+Intime as (
+    SELECT 
+        Username, 
+        CaptureDate,
+        CapturedTime AS FirstIn
+    FROM 
+        FirstIn
+    WHERE 
+        RowNum = 1
+),
+OutTime AS (
+    SELECT 
+        Username, 
+        CaptureDate,
+        CapturedTime AS LastOut
+    FROM 
+        LastOut
+    WHERE 
+        RowNum = 1
+),
+Calculated as (
+    SELECT 
+        IT.Username,
+        IT.CaptureDate,
+        IT.FirstIn,
+        CASE 
+            WHEN OT.LastOut IS NULL THEN CONVERT(datetime, CONVERT(date, IT.CaptureDate)) + ' 23:59:59'
+            ELSE OT.LastOut
+        END AS LastOut,
+        ISNULL(DATEDIFF(HOUR, IT.FirstIn, OT.LastOut), 0) AS TimeUsed,
+        CASE 
+            WHEN OT.LastOut IS NULL THEN 'System'
+            WHEN DATEDIFF(HOUR, IT.FirstIn, OT.LastOut) >= @logicLateHour THEN 'Complete'
+            ELSE 'Partially'
+        END AS Status
+    FROM 
+        Intime IT
+    LEFT JOIN 
+        OutTime OT ON OT.Username = IT.Username AND OT.CaptureDate = IT.CaptureDate
+),
+DateRange AS (
+    SELECT CONVERT(DATE, DATEADD(DAY, -1, @date)) AS Date, 1 AS DayCount
+    UNION ALL
+    SELECT CONVERT(DATE, DATEADD(DAY, -1, Date)), DayCount + 1
+    FROM DateRange
+    WHERE DayCount < @NumDays
+),
+CrossJoinUserDate AS (
+    SELECT 
+        u.[Username],
+        u.[FirstName],
+        u.[LastName],
+        dr.[Date]
+    FROM 
+        [ATTENDANCEDB].[registration].[User] u
+    CROSS JOIN 
+        DateRange dr
+),
+TheData AS (
+    SELECT 
+        CONCAT(cjd.FirstName,' ', cjd.LastName) AS Name,
+        cjd.Date,
+        ISNULL(cd.Status, 'Absent') AS Status
+    FROM 
+        CrossJoinUserDate cjd
+    LEFT JOIN 
+        Calculated cd ON cjd.Username = cd.Username AND cjd.Date = cd.CaptureDate
+) 
+
+-- Insert data from TheData CTE into a temporary table
+SELECT *
+INTO #TempTheData
+FROM TheData;
+
+-- Generate a comma-separated list of dates for pivoting
+SELECT @cols = COALESCE(@cols + ', ','') + QUOTENAME(CONVERT(varchar, Date, 106))
+FROM (SELECT DISTINCT Date FROM #TempTheData) AS DateList
+ORDER BY Date;
+
+-- Dynamic SQL to pivot the data
+SET @query = 
+    'SELECT Name, ' + @cols + ' 
+    FROM (
+        SELECT Name, Date, Status
+        FROM #TempTheData
+    ) AS SourceTable
+    PIVOT (
+        MAX(Status) 
+        FOR Date IN (' + @cols + ')
+    ) AS PivotTable';
+
+EXEC(@query);
+
+-- Drop the temporary table
+DROP TABLE #TempTheData;
+
+end
