@@ -264,4 +264,131 @@ There are some otheer data types called Large objects which can not be included 
    - `DATE` accept date and time information - fields stored include YEAR, MONTH, DATE, HOUR, MINUTE and second. Date values may be stored as literals or using conversion functions. The default Oracle date format for a given calendar day is defined by parameter NLS_DATE_FORMAT. to see the value for the paramters use the command `SHOW PARAMETERS NLS_TERRITORY` or `SHOW PARAMETERS NLS_DATE_FORMAT`, or you can use the following command `SELECT SYS_CONTEXT('USERENV','NLS_DATE_FORMAT') FROM DUAL`, the format can be changed with `ALTER SESSION` OR `ALTER SYSTEM` commands, not in the exam. defaulf format is DD-MM-RR, where RR is century year, in ANSI - YYYY-MM-DD
    - `TIMESTAMP(n)` extension of date that adds fractional seconds precision. stores Year, Month, day, hour, minute, second, and fractional seconds. The value of n specifies the precision of fractional seconds.n ranges from 0 to 9, default is 6.
    - `TIMESTAMP(n) WIH TIME ZONE` a variation of `TIMESTAMP` that adds either time zone region naem or an offset for time zone. is used in tracking date information across different time zones and geographical areas.
-   -
+   - `TIMESTAMP(n) WIH LOCAL TIME ZONE` here the offset is not stored but the system calculates the offset automatically with the user's time zone of the session. End user see the time in their local time zone.
+   - `INTERVAL YEAR(n) TO MONTH` holds the span of time in only year and month values
+   - `INTERVAL DAY(n1) TO SECOND(n2)` holds the span in days to second, n1 precision for days and n2 precision for seconds. n1 ranges from 0 - 9, defaults to 2, n2 defaults to 6
+4. `LARGE OBJECTS` - the exam will test the knowledge to work with LARGE OBJECTS data types, or LOB in SQL syntax. **Tables can gave multiple columns with LOB but they cannot be Primary Key, and can't ne used with DISTINCT, GROUP BY, ORDER BY or JOINS**. LOBs include the following
+   - `BLOB - BINARY LARGE OBJECT` - they acccept large binary objects, eg images and video files. Declaration is made without precision or scale. The max size is calculated by a formula not in exam with a starting size of 4GB, and CHUNK parameter, and setting of DB block size, affecting all storage in the database.
+   - `CLOB - CHARACTER LARGE OBJECT` accepts large text data elements. Declared without precision or scale, same manner of max size calculations as BLOB.
+   - `NCLOB` accepts CLOB data in Unicode, Mazimum size calculated in the same manner as in BLOB data type.
+
+All the data types seen are Build in data types, but a user can create own data types using the `CREATE TYPE` command built in in sql.
+
+## Creation of Constraints at The Time of Table Creation
+
+You can create constraints to support other objects but there is no create constraint statement, but they are created as part of other statements as `CREATE TABLE` OR `ALTER TABLE` statements.
+You can name the constraints yourself or leave it for the system to name it for you.
+Some constraints like primary keys and foreign key once created, the database triggers the creation of corresponding index object of the same name.
+
+Here is a create statement that triggers the syntax to create a constraint
+
+```sql
+CREATE TABLE positions(
+    position_id NUMBER,
+    position VARCHAR2(20),
+    exempt CHAR(1),
+    CONSTRAINT positions_pk PRIMARY KEY (position_id)
+);
+```
+
+here defined above, the line `CONSTRAINT positions_pk PRIMARY KEY (position_id)` we create a constraint and named it [something we don't neccessarily have to do], we have the following in our constraint:-
+
+- Object type - `CONSTRAINT`
+- constraint name - `positions_pk`
+- constraint type - `PRIMARY KEY` CONSTRAINT
+- column line applied - `POSITION_ID`
+
+### Ways of Creating Constraints in Create Table Statements
+
+There are two ways
+
+- Inline constraint creation - during table creation
+- Out of line, after columns definition
+
+### Create inline constraint creation
+
+Consider the example below
+
+```sql
+    CREATE TABLE ports(
+        port_id NUMBER PRIMARY KEY,
+        port_name VARCHAR2(20)
+    );
+```
+
+in the above example, the `PRIMARY KEY` constraint will be created but without a name on the column port_id and oracle will give it an auto name.
+
+The below example created the same constraint but provides a name for it
+
+```sql
+    CREATE TABLE ports(
+        port_id NUMBER CONSTRAINT port_id_pk PRIMARY KEY,
+        port_name VARCHAR2(20)
+    );
+```
+
+All the above are called inline statements since the constraints are included in the same line as the one we are defining our columns
+
+Consider another example for creating a not null constraint
+
+```sql
+    CREATE TABLE customers(
+        customer_id NUMBER,
+        customer_name VARCHAR2(20) NOT NULL
+    );
+```
+
+Here the customers table will be created with enforcement restricting null values of the customer name, it is also no named. Lets name it
+
+```sql
+    CREATE TABLE customers(
+        customer_id NUMBER,
+        customer_name VARCHAR2(20) CONSTRAINT customer_name_nn NOT NULL
+    );
+```
+
+Also we can include multiple constraints in a single table
+
+```sql
+    CREATE TABLE customers(
+        customer_id NUMBER PRIMARY KEY,
+        customer_name VARCHAR2(20) CONSTRAINT customer_name_nn NOT NULL
+    );
+```
+
+### Creating Out of Line Constraints
+
+Here we define the constraints after columns definition. Here, is an example of consraints defined with the out-of-line syntax
+
+```sql
+    CREATE TABLE ports(
+        port_id NUMBER,
+        port_name VARCHAR2(20),
+        PRIMARY KEY (port_id)
+    );
+```
+
+Also you can as well name columns in out-of-line constraints
+
+```sql
+    CREATE TABLE ports(
+        port_id NUMBER,
+        port_name VARCHAR2(20),
+        CONSTRAINT PORT_ID_PK PRIMARY KEY (port_id)
+    );
+```
+
+### Additional Ways To Create Constraints `ALTER TABLE`
+
+You can alter a table to add constraints, or remove them without a need to enforce the constraints creation at the time of table creation.
+
+example you can create a Posts table and later add a constraint to it
+
+```sql
+    CREATE TABLE ports(
+        port_id NUMBER,
+        port_name VARCHAR2(20)
+    );
+    -- THEN add constraint for the primary key
+    ALTER TABLE ports MODIFY port_id PRIMARY KEY;
+```
