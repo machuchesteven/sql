@@ -720,7 +720,7 @@ Tables with any columns set to UNUSED can be found in the data dictionary view U
 
 ## EXTERNAL TABLES
 
-`EXTERNAL TABLE` a read-only table that is defined within database but exists outside of the database. In other words, Its metadata is stored within the database but it exists outside of the database.
+`EXTERNAL TABLE` a read-only table that is defined within database but exists outside of the database. In other words, Its metadata is stored within the database but itS DATA exists outside of the database.
 
 ### Features of `EXTERNAL TABLES`
 
@@ -792,5 +792,43 @@ Lets say we have an external text file, containing data about invoices, lets cal
 now create the external table. `I just works like copying data in other sql statements`
 
 ```sql
-
+CREATE TABLE INVOICES_EXTERNAL(
+    INVOICE_ID CHAR(3),
+    INVOICE_DATE CHAR(9),
+    ACCOUNT_NUMBER CHAR(13)
+)
+ORGANIZATION EXTERNAL
+(
+    TYPE ORACLE_LOADER -- alternative might be ORALCE_DATAPUMP
+    DEFAULT DIRECTORY INVOICE_FILES
+    ACCESS PARAMETERS( -- 3 access parameters, records, skip, and fields
+        RECORDS DELIMITED BY NEWLINE
+        SKIP 2 -- tells the DB first two lines are to be skipped, header information
+        FIELDS( -- specifies each column to match the actual columns in the file
+            INVOICE_ID CHAR(3),
+            INVOICE_DATE CHAR(9),
+            ACCOUNT NUMBER CHAR(13)
+        )
+    )
+    LOCATION ('INVOICE_DATA.txt')
+);
 ```
+
+### Using an exteral table
+
+Once created we can select from it like any other table
+
+```sql
+SELECT * FROM INVOICES_EXTERNAL
+```
+
+Once the data are in the database, now we can use other functions to clean them up and format data
+
+```sql
+    SELECT TO_NUMBER(INVOICE_ID),
+        TO_DATE(INVOICE_DATE, 'MM/DD/RR') INVOICE_DATE,
+        LTRIM(ACCOUNT_NUMBER, ' ') ACCOUNT_NUMBER
+            FROM INVOICES_EXTERNAL
+```
+
+NOTE: We dont use DML on External tables
