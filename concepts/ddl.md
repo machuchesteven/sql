@@ -391,4 +391,248 @@ example you can create a Posts table and later add a constraint to it
     );
     -- THEN add constraint for the primary key
     ALTER TABLE ports MODIFY port_id PRIMARY KEY;
+    -- You can use the data-dictionary to determine system generated name for the constraint
+    SELECT CONSTRAINT_NAME FROM USER_CONSTRAINTS WHERE TABLE_NAME = 'PORTS';
+    -- once you capture the name, you can rename it as below
+    ALTER TABLE ports RENAME CONSTRAINT SYS_CXXX TO PORT_ID_PK;
+```
+
+The used above is the inline equivalent of adding constraints
+
+The out of line equivalent is as follows:-
+
+```sql
+    CREATE TABLE ports(
+        port_id NUMBER,
+        port_name VARCHAR2(20)
+    );
+    -- explicitly without naming the constraint
+    ALTER TABLE ports ADD PRIMARY KEY (port_id);
+    -- also you can name the constraint
+    ALTER TABLE ports ADD CONSTRAINT PORT_ID_PK PRIMARY KEY (port_id);
+```
+
+## Working with NOT NULL constraints
+
+The not null constraint is a bit different when it comes to syntax, it can not be created out of line meaning the **FOLLOWING ASSIGNMENTS ARE INVALID**
+
+```SQL
+    CREATE TABLE ports(
+        port_id NUMBER,
+        port_name VARCHAR2(20),
+        NOT NULL(port_name)
+    );
+    CREATE TABLE ports(
+        port_id NUMBER,
+        port_name VARCHAR2(20),
+        CONSTRAINT port_name_nn NOT NULL (port_name)
+    );
+    -- ALSO THIS WON'T WORK
+    ALTER TABLE ports
+        ADD NOT NULL (port_name);
+    ALTER TABLE ports
+        ADD CONSTRAINT port_name_nn NOT NULL (port_name);
+    -- these two above wont work cause they are alter table out of line equivalent,
+    -- but alter table in-line equivalent will worl
+
+    -- Consider these valid ones
+    ALTER TABLE ports
+        MODIFY port_name NOT NULL;
+    -- this one will work also
+
+    ALTER TABLE ports
+        MODIFY PORT_NAME CONSTRAINT port_name_nn NOT NULL;
+
+```
+
+## Types of Constraints
+
+There are several types of constraints including:-
+
+- PRIMARY KEY constraint
+- FOREIGN KEY constraint
+- NOT NULL constraint
+- CHECK constraint
+- UNIQUE constraint
+
+Exploring one by one at a time
+
+### 1. `NOT NULL` constraint
+
+This makes sure, any row applied to be added to a table, the specified column will always be supplied with values.
+
+We supply NOT NULL constraint to comstantly require data for a particular column.
+The following example fails, since there are already null values
+
+```sql
+    CREATE TABLE ports(
+        id number,
+        name varchar2(30)
+    );
+    insert into ports(id) values (1);
+    alter table ports modify name constraint port_name_nn not null;
+```
+
+If you apply a primary key constraint, you do not need to apply NOT NULL explicitly. The primary key contain the rules for the NOT NULL constraint
+
+### 2. `UNIQUE` constraint
+
+Enforces that any data added to the database will be unique from data already existing in the database,
+The following are few tips on unique constraint:-
+
+- Single UNIQUE constraint can be applied to a column or multiple columns
+- by itself, it allows null values to be added to the column, it only restrict data added to be one of a kind
+
+Primary key is a combination of NOT NULL and UNIQUE constraints
+
+`composite UNIQUE constraint` you may create a unique constraint that applies to multiple columns simultaneously, this will enforce the combination of those columns to be unique, data can repeat for individual columns, but may not repeat for all columns under the constraint. For example:-
+
+```sql
+CREATE TABLE students (
+    first_name VARCHAR2(30),
+    last_name VARCHAR2(30),
+    parent_id INTEGER,
+    CONSTRAINT students_un UNIQUE(first_name, last_name, parent_id)
+);
+```
+
+Mutliple columns clases must be assigned out of line
+
+### 3. `PRIMARY KEY` constraint
+
+Defines one or more coluns that will form a unique identifier for each row of data added to the table. `NOT NULL + UNIQUE = PRIMARY KEY`
+
+- A table may have only one primary key
+- A single column primary key is the most common form
+- It enforces the data will always be unique
+
+we have created multiple tables above with this clause
+
+`COMPOSITE PRIMARY KEY` -> This is when more than one column is assigned as the primary key. The combination of these columns will have to be unique collectively and all columns will have to contain the values. They are asigned using the following syntax:-
+
+```sql
+CREATE TABLE helpdesk(
+    hd_category VARCHAR2(20),
+    hd_Year NUMBER,
+    hd_ticket_no NUMBER,
+    hd_title VARCHAR2(30),
+    CONSTRAINT HelpDesk_PK PRIMARY KEY (hd_category, hd_year, hd_ticket_no)
+)
+```
+
+This can only be assigned out of line
+
+### 4. `FOREIGN KEY` constraint
+
+aplies to one or more columns in a particular table and works in conjunction with referred table. **Is a feature that helps to make sure that two tables can related to each other**. The `FOREIGN KEY` constraint does the following:-
+
+- identifies one or more columns in the current table, lets call it `child` table
+- For each of those columns, it also identifies one or more columns in the correponding table, lets call it `parent` table
+- It ensures the parent table already has either the primary key or a unique constraint on those correponding columns.
+- It then ensure that any future values added to the foreign key constrained columns of the child table are already stored in the corresponding columns of parent
+
+In simple words, the `FOREIGN KEY` constraint enforces `REFERENCIAL INTEGRITY` between two tables. The referenced table isn't forced to have primary key referenced, but just any column with a `UNIQUE` constraint. Since the primary key is a superset of the `UNIQUE` constraint, it satisfies the requirement.
+
+Syntax and examples, Lets say you have two tables ports and Ships, but you want to assign a home port to each ship, then
+
+```sql
+CREATE TABLE PORTS(
+    port_id NUMBER,
+    port_name VARCHAR2(20),
+    country VARCHAR2(40),
+    capacity NUMBER,
+    CONSTRAINT port_pk PRIMARY KEY (port_id)
+);
+
+CREATE TABLE ships(
+    ship_id NUMBER,
+    ship_name VARCHAR2(20),
+    home_port_id NUMBER,
+    CONSTRAINT ships_ports_fk FOREIGN KEY (home_port_id) REFERENCES PORTS (port_id)
+);
+-- INLINE FOREIGN KEY ASSIGNMENT - unnamed foreign key
+CREATE TABLE ships(
+    port_id NUMBER REFERENCES ports (port_id);
+)
+-- INLINE FOREIGN KEY ASSIGNMENT - NAMED foreign key
+CREATE TABLE ships(
+    port_id NUMBER CONSTRAINT ships_ports_fk REFERENCES ports (port_id);
+)
+-- OR, YOU CAN JUST USE THE ALTER TABLE TO ADD FOREIGN KEY TO THE TABLES YOU CREATE
+ALTER TABLE ships
+    ADD CONSTRAINT ships_ports_fk FOREIGN KEY (home_port_id) REFERENCES PORTS (port_id);
+```
+
+The most important line is `REFERENCES` since the line `FOREIGN KEY` only appears in Out of line assignments
+
+### 5. `ON DELETE` constraint
+
+This controls the behavior in foreign key constraints when parent rows are removed from the parent table. They define how columns should behave when those references rows are removed.
+Here comes the `ON DELETE` clause when creating a foreign key constraint. Consider the syntax below and later the options:-
+
+```sql
+CREATE TABLE ships
+(
+    ship_id NUMBER,
+    ship_name VARCHAR2(20),
+    home_port_id NUMBER,
+    CONSTRAINT ships_ports_fk FOREIGN KEY (home_port_id)
+        REFERENCES PORTS (port_id) ON DELETE SET NULL
+);
+```
+
+`ON DELETE` options:-
+
+- `ON DELETE SET NULL` - All child rows referencing the deleted row will be set to NULL
+- `ON DELETE CASCADE` - All child rows referencing the deleted row will be deleted too
+- `ON DELETE NO ACTION` - leaves everything unchanged
+
+### 6. `CHECK` constraint
+
+Attaches an expression to be checked once a new row is inserted into the database. The following are limitations of the CHECK constraint, It can not include refs to the following:-
+
+- Column in other tables
+- Presudocolumns eg CURRVAL, NEXTVAL, LEVEL, ROWNUM
+- Subqueries and Scalar Subqueries
+- User-defined functions
+- Certain functions whose values can not be known at time of the call eg SYSDATE, SYSTEMTIMESTAMP, DBTIMEZONE, LOCALTIMESTAMP, SESSIONTIMEZONE, USER, USERENV
+
+for a row of data to be accepted as input to the given table, any CHECK constraint present must evaluate to either TRUE or unknown due to a NULL.
+
+### Multiple Constraints
+
+can declare table with multiple constraints
+eg
+
+```sqL
+CREATE TABLE VENDORS(
+    vendor_id NUMBER CONSTRAINT VENDOR_ID_PK PRIMARY KEY,
+    VENDOR_NAME VARCHAR2(50) NOT NULL,
+    STATUS NUMBER(1) CONSTRAINT STATUS_NN NOT NULL,
+    CATEGORY VARCHAR2(20),
+    CONSTRAINT STATUS_CK CHECK (STATUS IN (4,5)),
+    CONSTRAINT CATEGORY_CK CHECK (CATEGORY IN ('ACTIVE', 'SUSPENDED', 'INACTIVE'))
+);
+```
+
+### DATA TYPES Restrictions on Constraints
+
+| Data Types               | NOT NULL | UNIQUE | PRIMARY KEY | FOREIGN KEY | CHECK |
+| :----------------------- | :------- | :----- | :---------- | :---------- | :---- |
+| TIMESTAMP WITH TIME ZONE | -        | NO     | NO          | NO          | -     |
+| BLOB                     | -        | NO     | NO          | NO          | -     |
+| CLOB                     | -        | NO     | NO          | NO          | -     |
+
+## DROP COLUMNS AND SET COLUMNS UNUSED
+
+### Dropping columns in Oracle
+
+lets refer to our `PORTS` TABLE with port_id, port_name, country and capacity. Lets say we don't need the country column anymore.
+
+There are two syntaxes for dropping columns in Oracle
+
+```sql
+ALTER TABLE POTS DROP COLUMN CAPACITY; -- THE KEYWORD `COLUMN` IS REQUIRED HERE
+-- OR
+ALTER TABLE POTS DROP (CAPACITY); -- THIS CAN WORK FOR MULTIPLE COLUMNS TOO
 ```
