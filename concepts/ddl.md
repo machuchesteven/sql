@@ -205,6 +205,8 @@ It will be named as SYS_C followed by a number generated automatically by the sy
 
 ### SQL CREATE TABLE statement
 
+**NOTE** - **`YOU CAN NOT CREATE MORE THAN 1,000 COLUMNS IN A SINGLE TABLE`**
+
 There are a lot of constraints but the exam in this clause tests for:-
 
 - How to create a table
@@ -635,6 +637,8 @@ There are two syntaxes for dropping columns in Oracle
 ALTER TABLE PORTS DROP COLUMN CAPACITY; -- THE KEYWORD `COLUMN` IS REQUIRED HERE
 -- OR
 ALTER TABLE PORTS DROP (CAPACITY); -- THIS CAN WORK FOR MULTIPLE COLUMNS TOO
+
+ALTER TABLE PORTS DROP (CAPACITY, COUNTRY); -- this will work right
 ```
 
 Restrictions when dropping columns:-
@@ -665,7 +669,128 @@ CREATE TABE ORDER_RETURNS(
     CRUISE_ORDER_ID NUMBER,
     CRUISE_ORDER_DATE DATE,
     CONSTRAINT PK_CR PRIMARY KEY (ORDER_RETURN_ID),
-    CONSTRAINT FK_CO_CR PRIMARY KEY (CRUISE_ORDER
-    )
-)
+    CONSTRAINT FK_CO_CR PRIMARY KEY (CRUISE_ORDER_ID, CRUISE_ORDER_DATE)
+);
+```
+
+in dropiing composite foreign keys, we have two approaches:-
+
+- Drop both foreign keys at once
+- Add the CASCADE CONSTRAINTS as we are deleting one column at a time
+
+```sql
+    ALTER TABLE order_returns DROP (CRUISE_ORDER_ID, CRUISE_ORDER_DATE);
+    -- OR WE CAN APPLY THE CASCADE CONSTRAINTS AS WE GO
+    ALTER TABLE order_returns DROP COLUMN CRUISE_ORDER_ID CASCADE CONSTRAINTS;
+    -- This will drop the limiting constraints on the column deleted which means will delete the constraint to both columns
+```
+
+`NOTE`: You can't delete all columns in a table, meaning you can't delete the last column of the table.
+
+## SETTING COLUMNS UNUSED
+
+You may declare a column `UNUSED` and leave it in place in case you don't want to use it.
+Setting columns unused, the following happens :-
+
+- You can never recover it
+- A `ROLLBACK` statement will have no effect on it
+- Once a column is set to `UNUSED` you can create other columns with the same name as it
+- Any constraints or indices in the column will be dropped too.
+- You can drop the UNUSED column, but you can't even identify the column
+- You can still drop unused columns
+
+**BENEFIT IS PERFORMANCE** -for the drop clause, it affect performance, but UNUSED works better than drop. Gives a better performance, with the same result as the DROP statement.
+
+Syntax to set column UNUSED:-
+
+```sql
+    ALTER TABLE table_name SET UNUSED COLUMN column_name; -- for single columns
+    ALTER TABLE table_name SET UNUSED (column_1, column_2); -- for multiple columns
+```
+
+if the column does'nt exist, the statement will fail.
+`YOU MUST ALWAYS HAVE AT LEAST ONE VALID COLUMN AT ANY TIME A TABLE EXISTS` - You can't set the last column unused.
+
+Tables with any columns set to UNUSED can be found in the data dictionary view USER_UNUSED_COL_TABS.
+
+```sql
+    ALTER TABLE table_name DROP UNUSED COLUMNS; -- EXAMPLE BELOW
+    ALTER TABLE order_returns DROP UNUSED COLUMNS;
+```
+
+## EXTERNAL TABLES
+
+`EXTERNAL TABLE` a read-only table that is defined within database but exists outside of the database. In other words, Its metadata is stored within the database but it exists outside of the database.
+
+### Features of `EXTERNAL TABLES`
+
+- You can query them with a SELECT, but the don't accept any DML functionality
+- You can't create an INDEX on them
+- They won't accept Constraints
+
+### Benefits of `EXTERNAL TABLES`
+
+- Create an easy to use bridge between tables and NON-database data sources.
+
+For familiarity with SQL **\*Loader, or Data Pump**, then you know how the incorporate the functionality found in those tools into SQL context.
+
+Example having a 3GL application creating data eg as files, and then loading those data into SQL using just a SQL SELECT statements instead of utilities such as SQL\* Loader.
+
+### Creating External Tables
+
+You can declare its columns and data types, also you can populate the the external table with a subquery at the time of creation.
+They are restricted in the following ways:-
+
+- no LOB data type allowed
+- No constraints allowed
+- you can't change the column to UNUSED, id you try the statement will be processed but the column will be dropped.
+
+All you have is to declare its structure and define parameters by which the SQL database communicates with the external table. Tp establish connection, you have tow understand `DIRECTORY` objects and `The Oracle Utilities SQL\* Loader and Oracle Data Pump`
+
+## Directory Objects
+
+First we will have to identify the directory in the OS where the External File will reside. `CREATE DIRECTORY` will help.
+
+`CREATE DIRECTORY` create an object in the DB representing the directory name on the server's file system.
+eg
+
+```sql
+    CREATE OR REPLACE DIRECTORY directory_name AS directory_reference;
+```
+
+`directory_name` is the name we specify as any other db object, `directory_reference` is the location in ur Oralce Server into which you wish the external table to be stored surrounded by single quotes
+
+```sql
+    CREATE OR REPLACE DIRECTORY book_files AS 'C:\Users\julie\Desktop\MachuBooks\db';
+```
+
+Once the directory is created, the owner must GRANT READ and/or WRITE access to any user who may use it
+
+```sql
+    GRANT READ ON DIRECTORY directory_name TO Username;
+    -- example
+    GRANT READ ON DIRECTORY book_files TO HR;
+    -- this includes any user who may wish to use the EXTERNAL tables assocociated with this directory
+```
+
+### ORACLE UTILITIES
+
+Oracle provides a lot of utilities some, the ones to be used with the external table
+
+- Oracle SQL\* Loader
+- Oracle Data Pump Export
+- Oracle Data Pump Import
+
+### Creating an External Table
+
+Lets say we have an external text file, containing data about invoices, lets call it `INVOICE_DATA.txt` and we want to create an external table for these data
+
+- Go to the Directory where Oracle Resides
+- create the subdir off the root level, call it `LOAD_INVOICES`
+- create the associated directory object `CREATE DIRECTORY INVOICE_FILES AS '\LOAD_INVOICES';`
+
+now create the external table. `I just works like copying data in other sql statements`
+
+```sql
+
 ```
