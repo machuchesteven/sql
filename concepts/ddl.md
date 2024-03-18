@@ -632,7 +632,40 @@ lets refer to our `PORTS` TABLE with port_id, port_name, country and capacity. L
 There are two syntaxes for dropping columns in Oracle
 
 ```sql
-ALTER TABLE POTS DROP COLUMN CAPACITY; -- THE KEYWORD `COLUMN` IS REQUIRED HERE
+ALTER TABLE PORTS DROP COLUMN CAPACITY; -- THE KEYWORD `COLUMN` IS REQUIRED HERE
 -- OR
-ALTER TABLE POTS DROP (CAPACITY); -- THIS CAN WORK FOR MULTIPLE COLUMNS TOO
+ALTER TABLE PORTS DROP (CAPACITY); -- THIS CAN WORK FOR MULTIPLE COLUMNS TOO
+```
+
+Restrictions when dropping columns:-
+
+- A table must have at least one column, **you can't drop all columns**
+- You can not drop a column referenced by a `FOREIGN KEY` constraint in another table
+
+in order to delete the parent key column, we must address the constraint
+
+```sql
+ALTER TABLE TABLE_NAME DROP COLUMN COLUMN_NAME CASCADE CONSTRAINTS;
+-- -CONSTRAINT OR CONSTRAINTS - BOTH WILL WORK
+```
+
+once you cascade or drop constraints in a parent column, child columns constraints will be dropped too.
+
+### Dropping COMPOSITE FOREIGN KEY constraints
+
+```SQL
+CREATE TABLE CRUISE_ORDERS(
+    CRUISE_ORDER_ID NUMBER,
+    ORDER_DATE DATE,
+    CONSTRAINT PK_CO PRIMARY KEY (CRUISE_ORDER_ID, ORDER_DATE)
+);
+
+CREATE TABE ORDER_RETURNS(
+    ORDER_RETURN_ID NUMBER,
+    CRUISE_ORDER_ID NUMBER,
+    CRUISE_ORDER_DATE DATE,
+    CONSTRAINT PK_CR PRIMARY KEY (ORDER_RETURN_ID),
+    CONSTRAINT FK_CO_CR PRIMARY KEY (CRUISE_ORDER
+    )
+)
 ```
