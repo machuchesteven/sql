@@ -832,3 +832,67 @@ Once the data are in the database, now we can use other functions to clean them 
 ```
 
 NOTE: We dont use DML on External tables
+
+```sql
+-- access the ORACLE_BASE path first
+
+
+create or replace directory book_files AS 'C:\app\softnet\product\21c\invoices';
+
+grant read, write on directory book_files to HR;
+
+revoke read on directory book_files from HR;
+
+create directory invoices as '\invoices';
+
+grant read, write on directory invoices to HR;
+
+select * from all_directories;
+
+-- now create the table, it will run
+
+CREATE TABLE INVOICES_EXTERNAL(
+    INVOICE_ID CHAR(3),
+    INVOICE_DATE CHAR(9),
+    ACCOUNT_NUMBER CHAR(13)
+)
+ORGANIZATION EXTERNAL
+(
+    TYPE ORACLE_LOADER
+    DEFAULT DIRECTORY book_files
+    ACCESS PARAMETERS(
+        RECORDS DELIMITED BY NEWLINE
+        SKIP 2
+        FIELDS(
+            INVOICE_ID CHAR(3),
+            INVOICE_DATE CHAR(9),
+            ACCOUNT_NUMBER CHAR(13)
+        )
+    )
+    LOCATION ('books.txt')
+);
+
+drop table INVOICES_EXTERNAL;
+
+select * from all_directories;
+
+select * from invoices_external;
+
+```
+
+cleaning and setting columns better for use from external tables
+
+```sql
+select to_number(invoice_id) from invoices_external;
+
+select to_number(invoice_id),
+to_date(invoice_date, 'MM/dd/RR'),
+to_char(account_number)
+from invoices_external;
+```
+
+Truncate table is DDL, doesn't fire any DML triggers
+
+```SQL
+    TRUNCATE TABLE table_name CASCADE; -- REMOVES ALL CONSTRAINTS TOO
+```
