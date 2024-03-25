@@ -133,3 +133,9 @@ DELETE table_name
 ```
 
 When the `where` is not supplied, it will delete all rows from the database, be very careful with the delete statement.
+
+## Tips
+
+Wherever a `WHERE` clause is issued, rows with null values will be ommitted, since any compariosn with null values returns `UNKNOWN`.
+
+hence where NULL < 50 will return `UNKNOWN` and be excluded from the result set
