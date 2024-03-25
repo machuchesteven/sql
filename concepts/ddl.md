@@ -2,6 +2,15 @@
 
 In oracle there are more than 8 database objects, but here we are just using tables. Tables are used to store data in the database.
 
+Main DDL Acts and their syntax
+
+- CREATE eg `CREATE SEQUENCE seq_name`
+- ALTER eg `ALTER TABLE table_name MODIFY table_column NOT NULL`
+- DROP eg `DROP TABLE table_name`
+- GRANT eg `GRANT [read/write/all/other_permissions] ON [directory/table/any object] TO [USER_NAME]`
+- REVOKE eg `REVOKE [read/write/all/other_permissions] ON [directory/table/any object] FROM [USER_NAME]`
+- TRUNCATE eg `TRUNCATE TABLE table_name`
+
 ## Types of Database Objects in Oracle
 
 In the lsit here below, listed with a star are the included in the exam.
