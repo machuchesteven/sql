@@ -86,3 +86,48 @@ The above statement will fail becasue the city added is not in the list of citie
 The `UPDATE` statement is used to modify data in a table, works on a single table at a time, and can be used to modify individual row or a list of rows in a table.
 
 As with `INSERT`, the `UPDATE` statement can also work with some `VIEW` objects to update data in those tables which the view are built upon. We will see later.
+
+Update modifies data in all rows which are concerned or statisfy the conditional check when provided, and does not care if the values are NULLS or there are values in the table already.
+
+Syntax for `UPDATE` is as follows:-
+
+```sql
+    UPDATE table_name SET column_name = value
+    where condition(s);
+```
+
+The update statement checks for constraints in a table, whenever there is a contradiction in the condition that conflicts with the constraints, the update statement is not executed.
+
+### Where Clause In Update
+
+This defines a condition for rows to be updated in the table. It is an optional clause, once omitted, it updates all the rows in the table.
+
+### Expressions in Update
+
+The update statement can use expressions to assign new values to the column specified. Forexample:-
+
+```sql
+UPDATE COMPENSATION
+    SET SALARY = SALARY * 1.05
+    WHERE EMPLOYEE_ID = 83;
+```
+
+the above expression will replace the Old Salary value with its 105% of the old value.
+
+### Note on Update as for Deleting and Adding Values
+
+Update can be used to add new values to the table but in just exsisting rows, update does not add new row to the table, or it does not delete a row from the table.
+
+## `DELETE` rows from a table
+
+The delete statement is used to delete rows from a table. Rows to be deleleted are identified by the `WHERE` clause of the `DELETE` statement. The syntax of the `DELETE` statement is as follows:-
+
+```sql
+DELETE FROM table_name -- the from keyword is optional in Oracle as seen below, both will work
+    WHERE condition; -- the where is optional
+-- OR
+DELETE table_name
+    WHERE condition;
+```
+
+When the `where` is not supplied, it will delete all rows from the database, be very careful with the delete statement.
