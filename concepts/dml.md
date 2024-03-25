@@ -27,7 +27,9 @@ The above operation works only for `ON DELETE CASCADE` and `ON UPDATE CASCADE` r
 
 ## Insert Values to Table
 
-During an INSERT operation, the following are perfomed by the insert statement
+Using the INSERT statement, in its simplest form, it adds rows to a particular table, it can add to multiple in advanced forms.
+
+During an `INSERT` operation, the following are perfomed by the insert statement
 
 - Check for the presence of the table and the columns specified
 - Check for expressions and values to be applied to the table
