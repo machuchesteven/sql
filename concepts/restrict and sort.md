@@ -152,6 +152,16 @@ There are several comparison operators including the following:-
 - IS compares for null
 - NOT - Negates the expression
 
+### Operator Precedence in SQL
+
+Operators in SQL execute in the following order:-
+
+1. +, - as UNARY operators
+2. \* , / - mutliplication and division
+3. +, -, || - plus, minus and concatenation
+
+note: Oracle has no modulo operator
+
 ### Comparing Data Types
 
 There are rules governing data types comparison. The first rule is data type comparison should be the same for the two expressions, sometimes implicit type conversion occurs, but sometimes it doesn't.
@@ -159,6 +169,7 @@ There are rules governing data types comparison. The first rule is data type com
 - `NUMERIC` - smaller numbers are less than larger numbers, 0 is greater than any negative number
 - `CHARACTER` - A is less than Z, Z is less than a, uppercase are less than lowercase letters. When numbers are treated as characters, `2` is greater than `10`, comparisons are case sensitive by default.
 - `DATE` - Yesterday is less than today, Earlier dates are less than later dates. `LATER DATES ARE GREATER DATES`
+- `DIGITS vs STRING` - numbers as strings are less than characters and less than some special characters non alphabetic, but some symbols are less than numbers
 
 #### `LIKE` OPERATOR
 
@@ -270,6 +281,8 @@ SELECT * FROM good_projs where days between 1 and 4;
 
 SELECT * FROM good_projs where days not between 1 and 4;
 ```
+
+`between is inclusive and not exclusive`
 
 #### IS NULL and IS NOT NULL
 
