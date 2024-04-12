@@ -418,6 +418,16 @@ LAG for a given row in a window, it shows the value of the preceding row of that
 LEAD for a given row in a window, it shows the value of the following row of that column
 
 ```sql
+LAG
+  { ( value_expr [, offset [, default]]) [ { RESPECT | IGNORE } NULLS ]
+  | ( value_expr [ { RESPECT | IGNORE } NULLS ] [, offset [, default]] )
+  }
+  OVER ([ query_partition_clause ] order_by_clause)
+```
+
+The syntax above works for all
+
+```sql
 SELECT ID, LAG(ID) OVER (ORDER BY ID), LEAD(ID) OVER (ORDER BY ID) ,LAG(ID) OVER (PARTITION BY WINDOW ORDER BY ID), LEAD(ID) OVER ( PARTITION BY WINDOW ORDER BY ID) FROM SHIPS;
 ```
 
@@ -477,4 +487,10 @@ SELECT 'Mikocheni, Dar es Salaam', INSTR('Mikocheni, Dar es Salaam', ', ') AS "C
 SELECT 'Mikocheni, Dar es Salaam', INSTR('Mikocheni, Dar es Salaam', ', ') AS "COMMA", SUBSTR('Mikocheni, Dar es Salaam', INSTR('Mikocheni, Dar es Salaam', ',')+2) AS "State" from dual;
 ```
 
-## OTHER FUNCTIONS
+## OTHER
+
+### LEAST AND GREATEST
+
+### RANK and DENSE_RANK
+
+### FIRST and LAST
