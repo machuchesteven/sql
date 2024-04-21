@@ -32,6 +32,12 @@ The following are some important sequence options:-
 - `CYCLE` - When the seq generator reaches one end of the range, restart on the other end, for ascending `REACH MAXVALUE go to MINVALUE`
 - `NOCYCLE` -
 
+if cycle is specified, there is a cache value for the sequence, without cycle the default is `NOCACHE`. with cycle, the value might be a number of times less than or equal to the number of increments in one cycle, otherwise throws an error
+hence
+
+- `CACHE integer` - as explained, Without specifying it, goes to default
+- `NOCACHE`
+
 ### Using a sequence
 
 A sequence contains the following pseudocolumns:-
