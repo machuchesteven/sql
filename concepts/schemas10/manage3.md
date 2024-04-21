@@ -78,7 +78,7 @@ There is no single comprehensive approach to index design for a given database a
 for example tips
 
 - a system that will not be queried much, but will be populated with INSERTS would not benefit much from indexes, since all inserts will be slower as it update the table and all its INDEX objects
-- On such tables, infrequent queries may not justify the creation of an index object amd their associated performance tradeoff
+- On such tables, infrequent queries may not justify the creation of an index object and their associated performance tradeoff
 - On the other hand, a system with more UPDATE statements will benefit from thoughfully designed indexes
 
 `NOTE`: The optimizer will do everything it can to use an index for a given query where the index is beneficial,it avoids an index only if its use would be detrimental, eg a table with a large number of rows with an indexed column that has low selectivity
