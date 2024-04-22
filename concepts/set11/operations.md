@@ -124,3 +124,5 @@ ORDER BY col1;
 The column you order by with must be specified in your list
 
 Both two sorting approaches are fine, just make sure they are the last clause of the query
+
+The column always takes the name of the first select's column
