@@ -423,3 +423,39 @@ when one is revoked, the other still remains
 This means, you can revoke direct privileges on object, but a user might still have privileges on that object through a role
 
 these statements falls on a category called DATA CONTROL LANGUAGE(DCL)
+
+## SECURING AND SWITCHING ROLES
+
+you can create a role with password
+and you can disable a role using the set role none
+
+```sql
+CREATE ROLE role_name IDENTIFIED BY password;
+GRANT role_name TO username;
+CONN USERNAME/user_password;
+SET ROLE role_name IDENTIFIED BY password; -- set the role to the role created above
+
+ALTER ROLE role_name NOT IDENTIFIED;
+SET ROLE role_name; -- now no password is required
+SELECT * FROM SESSION_ROLES; -- will display which roles the current user session have
+SET ROLE NONE;
+```
+
+the `SET ROLE` statement is used to set the role for the current user session
+
+```sql
+SET ROLE role_name; -- if a role is having a password you can do as above
+```
+
+also you can set multiple roles as follows;-
+`SET ROLE role1, role2, role3, role4 IDENTIFIED BY role_password, role5;`
+you can set multiple roles as above
+
+also you can set to all roles granted to that account enabled, you use
+`SET ROLE ALL`
+
+if u want to set all except a certain role
+`SET ROLE ALL EXCEPT role_name_to_except`
+
+to remove all roles we use the
+`SET ROLE NONE`

@@ -211,7 +211,6 @@ select * from good_projs where company_name like UPPER('m%') and days > 7;
 select * from good_projs where company_name like UPPER('m%') or days > 7;
 
 select * from good_projs where company_name like UPPER('m%') or days > 7 or company_name like UPPER('a%');
-
 ```
 
 Booleans Rules:-
