@@ -319,6 +319,10 @@ for views, to access a view, we need privilege to the view, and not the underlyi
 `NOTE`: If a user creates an object and grants privileges to some other users on that object, then once that object is dropped, the privileges are also dropped, and when recreated they should be assigned again,
 `FLASHBACK ... BEFORE DROP` will recover the table, associated INDEXES, and the table's privilege, and you won't need to grant the privileges again
 
+if you have a `CREATE PUBLIC SYNONYM` privilege, you can create a public synonym to any object in the database, even to those you don't own,
+the matter of selecting from those objects will require other permissions but creating the public
+synonym is not dependent on that
+
 ### VIEW PRIVILEGES IN THE DATA DICTIONARY
 
 there are many views in the data dictionary that are associated with privileges
@@ -423,6 +427,14 @@ when one is revoked, the other still remains
 This means, you can revoke direct privileges on object, but a user might still have privileges on that object through a role
 
 these statements falls on a category called DATA CONTROL LANGUAGE(DCL)
+you can grant and also revoke from many users and many roles at once
+
+consider
+
+```sql
+GRANT privilege(s) TO role, username, role2, username;
+
+```
 
 ## SECURING AND SWITCHING ROLES
 
