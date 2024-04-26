@@ -15,15 +15,15 @@ Main DDL Acts and their syntax
 
 In the lsit here below, listed with a star are the included in the exam.
 
-- Constraints
-- Tables
-- Sequences
-- `Roles`
-- Indexes
-- `Users`
-- Views
-- Private Synonyms
-- `Public Synonyms`
+- Constraints\*\*
+- Tables\*\*
+- Sequences\*\*
+- `Roles`\*\*
+- Indexes\*\*
+- `Users`\*\*
+- Views\*\*
+- Private Synonyms\*\*
+- `Public Synonyms`\*\*
 
 The following are objects that are not covered in the exam :-
 
@@ -269,6 +269,7 @@ There are some otheer data types called Large objects which can not be included 
 1. `CHARACTER` DATA TYPE - are also known as TEXT or STRING data types, they include the following:-
    - `CHAR(n)` - Fixed length alphanumeric value, `n` is optional, default is 1, when created with n = 5, and only entered a single character, the retrieval will contain 4 blank spaces. maximum value for n is 2000.
    - `VARCHAR2(n)` - Variable length alphanumeric value, n is compulsory, maximum value for n is 4000, max length is actually 4000 bytes, not characters. To override this you can set parameter `MAX_STRING_SIZE` tO `EXTENDED` making the length to 32,767.
+   - NVARCHAR2(n) - works like VARCHAR2 but encompasses features including support for unicode characters. - uses UTF-16 encoding
 2. `NUMERIC` - Numeric data types include the following:-
    - `NUMBER(n,m)` - accepts numeric data, notnegative, 0, and positive, where n is precision(total number of digits in either sides of the decimal point), and m is scale ie numbers of digits on the right side of the decimal point. Both n and m are optional. default are n = 1 to 38, m can range from -84 to 127. if both are ommited they default to their maximum value, if m is ommited, default to 0. **when the number entered is more than what the maximum precision set can accept, it raises an error** eg defined NUMBER(3,2), entered 10.59, this will raise an error, but NUMBER(5,2) defined, entered 1059.34, will only store 1100.00
 3. `DATE` DATA TYPE - sometimes referred to as DATETIMES, each date consist of a field and each field is a value for the date or time eg hours, minutes, seconds, month an so on. Constituent data types are:-

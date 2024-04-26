@@ -205,3 +205,46 @@ you can find restore point objects using the V$RESTORE_POINT dictionary view sco
 Also, restore points executions are DDL hence they commit an implicit commit
 
 from a normal stand point, you can not recover a purged table normal unles table achieve is enabled
+
+## FLASHBACK `AS OF` statement
+
+use of select statement with an AS OF clasue, retrieves data as it existed on an earlier time
+a query explicitly references a past time as through a time stamp or system change number. It returns data as was current at that point in time
+
+consider the queries below
+
+```sql
+SELECT * FROM table_name AS OF TIMESTAMP (timestamp expression);
+```
+
+the view FLASHBACK_TRANSACTION_QUERY consists of all flashback operations that have ever happened
+including TABLE_NAME and commit_scn, user, and more
+
+also you can perform maneuvers to insert the deleted rows with the current rows together in case of failure of data integrity
+
+```sql
+INSERT INTO ARCHIVE_TABLE
+(SELECT * FROM table_name AS OF timestamp(expression)
+UNION SELECT * FROM table_name
+)
+```
+
+### RESTRICTIONS ON FLASHBACK QUERY
+
+- the value specified must not be a subquery
+-
+
+## FLASHBACK ARCHIVE
+
+These store flashaback data and retain them for as much as it is specified using the RETENTION parameter
+you create a flashback archive and assign a quota to it, later you can create table and assign them to the flashback archive as below
+
+```sql
+CREATE FLASHBACK ARCHIVE {DEFAULT} archieve_name TABLESPACE tbs1 QUOTA XXG|XXM RETENTION X YEAR; -- You can specify an other timestamp
+ALTER FLASHBACK ARCHIVE SET DEFAULT;
+ALTER TABLE FLASHBACK ARCHIVE archieve_name;
+CREATE TABLE table_name (parameters) ENABLE ROW MOVEMENT FLASHBACK ARCHIVE archieve_name;
+-- disable
+
+ALTER TABLE table_name NO FLASHBACK ARCHIVE;
+```

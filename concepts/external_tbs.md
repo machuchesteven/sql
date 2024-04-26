@@ -149,3 +149,5 @@ PARTITION BY col_x(
 ```
 
 `NOTE:PARTITION` - this extend Oracle Partition features to allow partitions to reside in both Oracle Database Segments and in External Files and Sources. Helps for `Big Data SQL` where large portions can reside in external portions
+
+with ORACLE_DATAPUMP even the structure of the table is stored outside the table
