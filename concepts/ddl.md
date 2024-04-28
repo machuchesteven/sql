@@ -457,6 +457,18 @@ The not null constraint is a bit different when it comes to syntax, it can not b
 
 ```
 
+## Enabling and Disabling Constraints
+
+When you create a unique or check constraints after the values have already been in place, you can choose to enable and disable constraints
+if the values present does not confirm with the constraints, but you want incoming values to follow the constraints, we use the `NOVALIDATE` keyword during enabling constraints
+
+```sql
+ALTER TABLE table_name ENABLE NOVALIDATE CONSTRAINT constraint_name;
+ALTER TABLE table_name ENABLE CONSTRAINT constraint_name;
+-- disabling constraints
+ALTER TABLE table_name DISABLE CONSTRAINT constraint_name;
+```
+
 ## Types of Constraints
 
 There are several types of constraints including:-
@@ -906,3 +918,7 @@ Truncate table is DDL, doesn't fire any DML triggers
 ```SQL
     TRUNCATE TABLE table_name CASCADE; -- REMOVES ALL CONSTRAINTS TOO
 ```
+
+## TEMPORARY TABLES
+
+global temporary tables using oracle

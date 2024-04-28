@@ -242,4 +242,4 @@ tips
 1. EXISTS does not compare to any value
 2. IN compares exact number of values so columns compared must be as columns in the IN subquery
 3. ALL works with comparison operators to get values
-4. EXISTS is AKA a semijoin
+4. EXISTS is AKA a semijoin or extended outer join

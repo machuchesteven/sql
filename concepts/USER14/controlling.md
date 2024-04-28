@@ -257,6 +257,15 @@ GRANT privilege ON object TO username options;
 REVOKE privilege ON object FROM username;
 ```
 
+### GRANT PRIVILEGES ON SPECIFIED COLUMNS
+
+we can pass the value of columns in brackets to specify and allow the user to only grant privileges on the specified columns
+as
+
+```sql
+GRANT UPDATE, SELECT, INSERT(column names) ON table_name TO username options;
+```
+
 ### SCHEMA prefixes
 
 to reference a table owned by another object we must use a schema prefix, and the prefix is the name of the user account owning the object
