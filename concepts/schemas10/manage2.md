@@ -85,3 +85,18 @@ Rollback does not reverse the value of the sequence generator, hence before and 
 `NOTE`: If you call a sequence generator from an invalid position based on the rules above, the statement will fail and the generator will not issue any advancement due to syntax errors
 
 Other correct call in syntax, will advance the sequence generator
+
+## ALTER SEQUENCE
+
+you can use the ALTER SEQUENCE statement to change the increment, minimum and maximum values, cached numbers and behaviour of an existing sequence
+
+the following options can follow the `ALTER SEQUENCE sequence_name`:-
+
+- `INCREMENT BY integer`
+- `MAXVALUE integer | NOMAXVALUE`
+- `MINVALUE integer | NOMINVALUE`
+- `CYCLE | NOCYCLE`
+- `CACHE | NOCACHE`
+- `ORDER | NOORDER`
+- `KEEP | NOKEEP`
+- `SESSION | GLOBAL`

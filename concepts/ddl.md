@@ -921,4 +921,42 @@ Truncate table is DDL, doesn't fire any DML triggers
 
 ## TEMPORARY TABLES
 
-global temporary tables using oracle
+a temporary table is a table that holds data only for the duration of a session or transaction
+
+unlike others, global temporary tables are permanent database objects that store data on disk and are visible to all sessions
+However, the data stored in global temporary tables is private to the session ie each session can only access its own data in a global temporary table
+
+In 18c, there are **private temporary tables** whic are memory based and are automatically dropped at the end of the session or transaction
+
+### Creating Global Temporary Tables
+
+syntax for creating global temporary tables
+
+```sql
+CREATE GLOBAL TEMPORARY TABLE table_name(
+    column_defn,
+    ...,
+    table_constraints
+) ON COMMIT [DELETE ROWS | PRESERVE ROWS]; -- default is ON COMMIT DELETE ROWS;
+
+CREATE GLOBAL TEMPORARY TABLE table_name(
+    column_defn,
+    ...,
+    table_constraints
+) ON COMMIT [DELETE ROWS | PRESERVE ROWS]
+TABLESPACE tablespace_name;
+```
+
+The syntax is the same as in normal tables except for the keywords, `GLOBAL TEMPORARY` and the `ON COMMIT option`
+
+- ON COMMIT DELETE ROWS - Specifies the table to be transaction specific
+- ON COMMIT PRESERVE ROWS -Specifies the table to be session specific
+
+by default, it is ON COMMIT DELETE ROWS, and also oracle stores temporary tables in a users default tablespace, or otherwise you can assign a tablespace
+
+the following key features are with Global tables
+
+1. Oracle allows only one transaction in the case of a transaction specific temporary table
+2. It is not possible to perform DDL on a temporary table, except TRUNCATE if there are one or more sessions currently bound to that table
+3. Rollback on a temporary table will cause all data entered to be lost
+4. Backup and recovery on temporary tables are not available in case of system failure
