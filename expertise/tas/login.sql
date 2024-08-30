@@ -8,16 +8,16 @@ BEGIN
 	IF EXISTS (SELECT * FROM [registration].[User] WHERE USERNAME = @Username)
 	BEGIN
 		SELECT @ReturnValue = 
-				CASE WHEN PasswordHash = @PasswordHash AND IsLocked = 0 THEN 1
-					WHEN PasswordHash = @PasswordHash AND IsLocked = 1 THEN 2
-					WHEN PasswordHash <> @PasswordHash AND IsLocked = 0 THEN 3
-					WHEN PasswordHash <> @PasswordHash AND IsLocked = 1 THEN 4
-					ELSE 0
+				CASE WHEN PasswordHash = @PasswordHash AND IsLocked = 0 THEN 1 -- RIGHT INFORMATION AND OPEN ACCOUNT
+					WHEN PasswordHash = @PasswordHash AND IsLocked = 1 THEN 2 -- RIGHT INFORMATION AND CLOSED ACCOUNT
+					WHEN PasswordHash <> @PasswordHash AND IsLocked = 0 THEN 3 -- WRONG INFORMATION AND OPEN ACCOUNT
+					WHEN PasswordHash <> @PasswordHash AND IsLocked = 1 THEN 4 -- WRONG INFORMATION AND CLOSED ACCOUNT
+					ELSE 0 -- UNKNOWN CASE HAPPENED
 				END,
 				@LoginAttempts =
 				CASE 
 				-- Add attempts so that it may be easy to know whether to lock the account or not
-					WHEN PasswordHash <> @PasswordHash AND IsLocked = 0 THEN LoginAttempts + 1
+					WHEN PasswordHash <> @PasswordHash AND IsLocked = 0 THEN LoginAttempts + 1 
 					ELSE 0
 				END
 				FROM [registration].[User] WHERE Username = @Username
@@ -26,7 +26,7 @@ BEGIN
 		BEGIN
 			SET @ReturnValue = 0
 	END
-	INSERT INTO LOGINATTEMPTS(Username, Succeeded, IpAddress) 
+	INSERT INTO registration.LOGINATTEMPTS(Username, Succeeded, IpAddress) 
 		values (
 			@Username,
 			CASE
@@ -48,6 +48,22 @@ BEGIN
 	BEGIN
 	UPDATE [registration].[User] SET [LoginAttempts] = 0 WHERE Username = @Username
 	END
-	select @ReturnValue AS STATUS, @MaxAttempts - @LoginAttempts as RemainingAttempts;
+	SELECT
+	@ReturnValue AS STATUS,
+	@MaxAttempts - @LoginAttempts as RemainingAttempts,
+	CASE WHEN @ReturnValue = 2 OR @ReturnValue = 4 THEN 1
+	WHEN @MaxAttempts - @LoginAttempts = 0 AND @ReturnValue =3 THEN 1
+	ELSE 0 END AS AccountLocked;
 	COMMIT TRANSACTION spLogin
 END
+
+-- USER UNLOCKING
+CREATE OR ALTER  PROCEDURE [registration].[spUnlockUser] @User VARCHAR(50) = 'admin', @Username VARCHAR(50), @PasswordHash VARCHAR(256)
+AS
+BEGIN
+	BEGIN TRANSACTION spUnlockUser
+		UPDATE registration.[User] SET IsLocked = 0,LoginAttempts = 0
+		WHERE Username = @Username
+	COMMIT TRANSACTION spUnlockUser
+END
+GO

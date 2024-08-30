@@ -153,3 +153,21 @@ DELETE LOGINATTEMPTS;
 GO
 
 UPDATE USERS SET ATTEMPTS = 0;
+
+[registration].[spUnlockUser]
+
+
+
+CREATE TABLE registration.[LoginMessage](
+Id tinyint primary key,
+Message varchar(256) not null
+);
+
+TRUNCATE TABLE registration.[LoginMessage] ;
+
+insert into registration.[LoginMessage] values 
+(1, 'Login Succesful'),
+(2, 'The user account is locked, please contact the administrator for support'),
+(3, 'Wrong Username or Password'),
+(4, 'The user account is locked, please contact the administrator for support'),
+(0, 'Wrong Username or Password');
